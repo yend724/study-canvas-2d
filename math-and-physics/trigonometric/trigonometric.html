@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .wrapper {
+        padding: 32px 64px;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .canvas {
+        display: block;
+        margin: 16px auto;
+      }
+    </style>
+    <link rel="stylesheet" href="/math-and-physics/common/css/reset.css" />
+    <script src="/math-and-physics/common/js/Vec2.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">単位円と三角関数</h1>
+      <canvas id="canvas" class="canvas"></canvas>
+    </div>
+    <script>
+      "use strict";
+      let context, circleColor;
+
+      const r = 200; // 単位円の半径　（本来は1だか便宜上200）
+      let deg = 0;
+      const loop = () => {
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 単位円
+        context.strokeStyle = "#000";
+        context.beginPath();
+        context.arc(
+          canvas.width / 2,
+          canvas.height / 2,
+          r,
+          0,
+          Math.PI * 2,
+          false
+        );
+        context.stroke();
+
+        deg += 1;
+        const rad = (deg * Math.PI) / 180; // 度からラジアンに変換
+        const x = canvas.width / 2 + r * Math.cos(rad); // x座標
+        const y = canvas.height / 2 + r * Math.sin(rad); // y座標
+
+        // 円周上の点 P
+        context.fillStyle = "red";
+        context.beginPath();
+        context.arc(x, y, 5, 0, Math.PI * 2, false);
+        context.fill();
+
+        context.font = "bold 14px sans-serif";
+        context.textAlign = "center";
+        context.fillText("x = cos(rad)", x, y - 30);
+        context.fillText("y = sin(rad)", x, y - 10);
+
+        // 円の中心から点Pまでの線分
+        context.beginPath();
+        context.moveTo(canvas.width / 2, canvas.height / 2);
+        context.lineTo(x, y);
+        context.closePath();
+        context.stroke();
+
+        requestAnimationFrame(loop);
+      };
+
+      const init = () => {
+        const canvas = document.getElementById("canvas");
+        canvas.width = 500;
+        canvas.height = 500;
+
+        context = canvas.getContext("2d");
+        if (!context) {
+          console.log("Error!");
+          return null;
+        }
+
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        loop();
+      };
+
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
