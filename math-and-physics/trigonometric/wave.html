@@ -34,9 +34,8 @@
       let canvas2, context2;
       let degree = 0;
 
-      let canvasWidth = window.innerWith > 500 ? 500 : window.innerWidth;
-      let canvasHeight = canvasWidth > 500 ? 500 : canvasWidth;
-
+      const canvasWidth = window.innerWidth > 500 ? 500 : window.innerWidth;
+      const canvasHeight = canvasWidth > 500 ? 500 : canvasWidth;
       // 1個目の canvas
       const drawWaveDots = (x, deg) => {
         context.beginPath();
