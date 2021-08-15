@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Trigonometric</title>
+    <style>
+      .wrapper {
+        padding: 32px 0;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .canvas {
+        display: block;
+        margin: 16px auto 0;
+      }
+    </style>
+    <link rel="stylesheet" href="../common/css/reset.css" />
+    <script src="../common/js/Vec2.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">正弦波</h1>
+      <canvas id="canvas1" class="canvas"></canvas>
+      <canvas id="canvas2" class="canvas"></canvas>
+    </div>
+    <script>
+      "usestrict";
+      let canvas, context;
+      let canvas2, context2;
+      let degree = 0;
+
+      let canvasWidth = window.innerWith > 500 ? 500 : window.innerWidth;
+      let canvasHeight = canvasWidth > 500 ? 500 : canvasWidth;
+
+      // 1個目の canvas
+      const drawWaveDots = (x, deg) => {
+        context.beginPath();
+        deg += x * 10;
+        const y = 250 + 250 * Math.sin(deg / 100);
+        context.fillStyle = "blue";
+        context.arc(x * 10, y, 5, 0, Math.PI * 2, false);
+        context.fill();
+      };
+
+      const loop1 = () => {
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        degree++;
+        for (let i = 0; i < 51; i++) {
+          drawWaveDots(i, degree);
+        }
+
+        requestAnimationFrame(loop1);
+      };
+
+      const canvasApp1 = () => {
+        canvas = document.getElementById("canvas1");
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        context = canvas.getContext("2d");
+        if (!context) {
+          console.log("Error!");
+          return null;
+        }
+
+        loop1();
+      };
+
+      // 2個目の canvas
+      const drawWaveLines = (x, deg) => {
+        context2.beginPath();
+        deg += x;
+        const y = 250 + 250 * Math.sin(deg / 100);
+        context2.strokeStyle = "blue";
+        context2.moveTo(x, y);
+        context2.lineWidth = 1;
+        context2.lineTo(x, 500);
+        context2.closePath();
+        context2.stroke();
+      };
+
+      const loop2 = () => {
+        context2.fillStyle = "#ddd";
+        context2.fillRect(0, 0, canvas2.width, canvas2.height);
+
+        degree++;
+        for (let i = 0; i < 501; i++) {
+          drawWaveLines(i, degree);
+        }
+
+        requestAnimationFrame(loop2);
+      };
+
+      const canvasApp2 = () => {
+        canvas2 = document.getElementById("canvas2");
+        canvas2.width = canvasWidth;
+        canvas2.height = canvasHeight;
+
+        context2 = canvas2.getContext("2d");
+        if (!context2) {
+          console.log("Error!");
+          return null;
+        }
+
+        loop2();
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        canvasApp1();
+        canvasApp2();
+      });
+    </script>
+  </body>
+</html>
