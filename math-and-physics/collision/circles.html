@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .wrapper {
+        padding: 32px 64px;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .canvas {
+        display: block;
+        margin: 16px auto;
+      }
+    </style>
+    <link rel="stylesheet" href="/math-and-physics/common/css/reset.css" />
+    <script src="/math-and-physics/common/js/Vec2.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">円同士の衝突判定</h1>
+      <canvas id="canvas" class="canvas"></canvas>
+    </div>
+    <script>
+      "use strict";
+      let context, circleColor;
+
+      class Circle {
+        constructor(position, velocity, r) {
+          this.p = position;
+          this.v = velocity;
+          this.r = r;
+        }
+      }
+
+      const circle1 = new Circle(new Vec2(40, 210), new Vec2(1, 0), 40);
+      const circle2 = new Circle(new Vec2(460, 210), new Vec2(-1, 0), 40);
+
+      const getDistance = (a, b) => {
+        // 二点間の距離
+        const dd = Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2);
+        return Math.sqrt(dd);
+      };
+
+      const loop = () => {
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 二つの円の中心間と半径の和を比較
+        // 衝突した（円が重なった）時に赤色にする
+        const d = getDistance(circle1.p, circle2.p);
+        circleColor = circle1.r + circle2.r <= d ? "green" : "red";
+
+        context.fillStyle = circleColor;
+        context.beginPath();
+        context.arc(
+          circle1.p.x,
+          circle1.p.y,
+          circle1.r,
+          0,
+          Math.PI * 2.0,
+          false
+        );
+        context.fill();
+
+        context.beginPath();
+        context.arc(circle2.p.x, circle2.p.y, circle2.r, 0, Math.PI * 2);
+        context.fill();
+
+        circle1.p.add(circle1.v);
+        circle2.p.add(circle2.v);
+
+        requestAnimationFrame(loop);
+      };
+
+      const init = () => {
+        const canvas = document.getElementById("canvas");
+        canvas.width = 500;
+        canvas.height = 500;
+
+        context = canvas.getContext("2d");
+        if (!context) {
+          console.log("Error!");
+          return null;
+        }
+
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        loop();
+      };
+
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
