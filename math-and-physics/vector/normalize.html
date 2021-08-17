@@ -17,7 +17,6 @@
       .canvas {
         display: block;
         margin: 16px auto 0;
-        max-width: 100%;
       }
     </style>
     <link rel="stylesheet" href="../common/css/reset.css" />
@@ -37,6 +36,8 @@
         canvasPosY = 0;
 
       const loop = () => {
+        requestAnimationFrame(loop);
+
         context.fillStyle = "#ddd";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -77,8 +78,6 @@
         ); // マウスの位置へ線を引く
         context.closePath();
         context.stroke();
-
-        requestAnimationFrame(loop);
       };
 
       const init = () => {
@@ -99,17 +98,26 @@
       };
 
       window.addEventListener("DOMContentLoaded", init);
+
       window.addEventListener("mousemove", (e) => {
         canvasPosY = canvas.getBoundingClientRect().top;
         canvasPosX = canvas.getBoundingClientRect().left;
         mouseX = e.clientX;
         mouseY = e.clientY;
       });
-      window.addEventListener("touchmove", (e) => {
+      window.addEventListener("touchstart", (e) => {
+        const touchObject = event.changedTouches[0];
         canvasPosY = canvas.getBoundingClientRect().top;
         canvasPosX = canvas.getBoundingClientRect().left;
-        mouseX = e.clientX;
-        mouseY = e.clientY;
+        mouseX = touchObject.clientX;
+        mouseY = touchObject.clientY;
+      });
+      window.addEventListener("touchmove", (e) => {
+        const touchObject = event.changedTouches[0];
+        canvasPosY = canvas.getBoundingClientRect().top;
+        canvasPosX = canvas.getBoundingClientRect().left;
+        mouseX = touchObject.clientX;
+        mouseY = touchObject.clientY;
       });
     </script>
   </body>
