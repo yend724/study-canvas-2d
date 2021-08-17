@@ -17,6 +17,7 @@
       .canvas {
         display: block;
         margin: 16px auto 0;
+        max-width: 100%;
       }
     </style>
     <link rel="stylesheet" href="../common/css/reset.css" />
@@ -99,6 +100,12 @@
 
       window.addEventListener("DOMContentLoaded", init);
       window.addEventListener("mousemove", (e) => {
+        canvasPosY = canvas.getBoundingClientRect().top;
+        canvasPosX = canvas.getBoundingClientRect().left;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+      window.addEventListener("touchmove", (e) => {
         canvasPosY = canvas.getBoundingClientRect().top;
         canvasPosX = canvas.getBoundingClientRect().left;
         mouseX = e.clientX;
