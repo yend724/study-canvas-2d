@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vector Normalize</title>
+    <style>
+      .wrapper {
+        padding: 32px 0;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .canvas {
+        display: block;
+        margin: 16px auto 0;
+      }
+    </style>
+    <link rel="stylesheet" href="../common/css/reset.css" />
+    <script src="../common/js/Vec2.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">ベクトルの正規化</h1>
+      <canvas id="canvas" class="canvas"></canvas>
+    </div>
+    <script>
+      "use strict";
+      let canvas, context;
+      let mouseX = 0,
+        mouseY = 0;
+      let canvasPosX = 0,
+        canvasPosY = 0;
+
+      const loop = () => {
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 原点からマウスまでの位置
+        const targetPositionY = mouseY - canvasPosY;
+        const targetPositionX = mouseX - canvasPosX;
+
+        // 原点からマウスまでのベクトル
+        const OriginToMouse = new Vec2(targetPositionX, targetPositionY);
+
+        // 原点から円の中心までのベクトル
+        const OriginToCenter = new Vec2(canvas.width / 2, canvas.height / 2);
+
+        // 円の中心からマウスまでのベクトル
+        const CenterToMouse = OriginToMouse.sub({
+          x: OriginToCenter.x,
+          y: OriginToCenter.y,
+        })
+          .normalize() // 正規化
+          .multi(200); // 半径と同じだけかける
+
+        context.beginPath();
+        context.arc(
+          canvas.width / 2,
+          canvas.height / 2,
+          200,
+          0,
+          Math.PI * 2,
+          false
+        );
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(canvas.width / 2, canvas.height / 2); // 円の中心から
+        context.lineTo(
+          canvas.width / 2 + CenterToMouse.x,
+          canvas.height / 2 + CenterToMouse.y
+        ); // マウスの位置へ線を引く
+        context.closePath();
+        context.stroke();
+
+        requestAnimationFrame(loop);
+      };
+
+      const init = () => {
+        canvas = document.getElementById("canvas");
+        canvas.width = 500;
+        canvas.height = 500;
+
+        context = canvas.getContext("2d");
+        if (!context) {
+          console.log("Error!");
+          return null;
+        }
+
+        canvasPosY = canvas.getBoundingClientRect().top;
+        canvasPosX = canvas.getBoundingClientRect().left;
+
+        loop();
+      };
+
+      window.addEventListener("DOMContentLoaded", init);
+      window.addEventListener("mousemove", (e) => {
+        canvasPosY = canvas.getBoundingClientRect().top;
+        canvasPosX = canvas.getBoundingClientRect().left;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+    </script>
+  </body>
+</html>

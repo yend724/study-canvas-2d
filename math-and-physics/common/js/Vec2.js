@@ -21,4 +21,13 @@ class Vec2 {
     this.y *= s;
     return this;
   }
+
+  get magnitude() {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  }
+
+  normalize() {
+    const { x, y, magnitude } = this;
+    return new Vec2(x / magnitude, y / magnitude);
+  }
 }
