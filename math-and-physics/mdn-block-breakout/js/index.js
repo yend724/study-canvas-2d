@@ -4,28 +4,29 @@
       this.x = x;
       this.y = y;
     }
-    add(v) {
-      this.x += v.x;
-      this.y += v.y;
-      return this;
+    add(b) {
+      let a = this;
+      return new Vec2(a.x + b.x, a.y + b.y);
     }
-    sub(v) {
-      this.x -= v.x;
-      this.y -= v.y;
-      return this;
-    }
-    multi(num) {
-      this.x *= num;
-      this.y *= num;
-      return this;
+    sub(b) {
+      let a = this;
+      return new Vec2(a.x - b.x, a.y - b.y);
     }
     mag() {
-      const { x, y } = this;
-      return Math.sqrt(x ** 2 + y ** 2);
+      let a = this;
+      return Math.sqrt(a.x ** 2 + a.y ** 2);
     }
-    normalized() {
-      const { x, y, mag } = this;
-      return new Vector2(x / mag(), y / mag());
+    mul(num) {
+      return new Vec2(this.x * num, this.y * num);
+    }
+    norm() {
+      let a = this;
+      return a.mul(1 / a.mag());
+    }
+    // 内積
+    dot(b) {
+      let a = this;
+      return a.x * b.x + a.y * b.y;
     }
   }
 
@@ -43,13 +44,13 @@
     if (!ctx) return;
 
     const ball = new Ball(
-      new Vec2(canvas.width / 2, canvas.height - 30),
+      new Vec2(canvas.width / 2, canvas.height - 100),
       new Vec2(3, -3),
       10
     );
 
     const paddle = new Ball(
-      new Vec2(canvas.width / 2, canvas.height),
+      new Vec2(canvas.width / 2, canvas.height - 40),
       new Vec2(0, 0),
       20
     );
@@ -166,65 +167,61 @@
       }
     };
 
-    const getDistance = (x1, y1, x2, y2) => {
-      const dd = (x1 - x2) ** 2 + (y1 - y2) ** 2;
-      return Math.sqrt(dd);
-    };
-
     let id;
     let stop = false;
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBall();
       drawPaddle();
-      //drawBricks();
-      //drawLives();
-      //drawScore();
-      //collisionDetection();
+      drawBricks();
+      drawLives();
+      drawScore();
+      collisionDetection();
+
+      const nextBall = new Ball(ball.p.add(ball.v), ball.v, ball.r);
+      const d = nextBall.p.sub(paddle.p).mag(); //距離
+      if (d < ball.r + paddle.r) {
+        // 衝突判定
+
+        // 衝突時、ボールの速度を反射させる
+        const v = ball.v;
+        const w = ball.p.sub(paddle.p);
+        const cosTheta = v.mul(-1).dot(w) / (v.mul(-1).mag() * w.mag());
+        const n = w.norm().mul(v.mag() * cosTheta);
+        const r = v.add(n.mul(2));
+        ball.v = r;
+
+        // めりこみ防止(パドルの境界線上に位置を直す)
+        ball.p = paddle.p.add(w.norm().mul(ball.r + paddle.r));
+      }
 
       if (
         ball.p.x + ball.v.x > canvas.width - ball.r ||
         ball.p.x + ball.v.x < ball.r
       ) {
+        // 左右の衝突
         ball.v.x *= -1;
       }
 
-      if (
-        ball.p.y + ball.v.y < ball.r ||
-        ball.p.y + ball.v.y > canvas.height - ball.r
-      ) {
-        ball.v.y *= -1;
+      if (ball.p.y + ball.v.y < ball.r) {
+        // 上端との衝突
+        ball.v.y = -ball.v.y;
       }
 
-      const distance = getDistance(
-        ball.p.x + ball.v.x,
-        ball.p.y + ball.v.y,
-        paddle.p.x,
-        canvas.height
-      );
-
-      if (distance <= ball.r + paddle.p.r) {
-        ball.v.y *= -1;
+      if (ball.p.y + ball.v.y > canvas.height - ball.r) {
+        // 下端との衝突
+        lives--;
+        if (lives === 0) {
+          alert("GAME OVER");
+          stop = true;
+        }
+        ball.v.x = 3;
+        ball.v.y = -3;
+        ball.p.y = canvas.height - 100;
+        ball.p.x = canvas.width / 2;
       }
-      // if (y + ball.v.y < ball.r) {
-      //   ball.v.y = -ball.v.y;
-      // }
-      // if (y + ball.v.y > canvas.height - ball.r) {
-      //   if (x > paddle.p.x - paddle.p.r && x < paddle.p.x + paddle.p.r) {
-      //     ball.v.y = -ball.v.y;
-      //   } else {
-      //     lives--;
-      //     if (lives === 0) {
-      //       alert("GAME OVER");
-      //       stop = true;
-      //     }
-      //     ball.v.x = 3;
-      //     ball.v.y = -3;
-      //     paddle.p.x = (canvas.width - paddle.p.r) / 2;
-      //   }
-      // }
 
-      if (rightPressed && paddle.p.x < canvas.width - paddle.p.r) {
+      if (rightPressed && paddle.p.x < canvas.width) {
         paddle.p.x += 7;
       }
       if (leftPressed && paddle.p.x > 0) {
