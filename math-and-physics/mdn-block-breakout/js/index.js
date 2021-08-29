@@ -1,15 +1,59 @@
 (() => {
+  class Vec2 {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+    add(v) {
+      this.x += v.x;
+      this.y += v.y;
+      return this;
+    }
+    sub(v) {
+      this.x -= v.x;
+      this.y -= v.y;
+      return this;
+    }
+    multi(num) {
+      this.x *= num;
+      this.y *= num;
+      return this;
+    }
+    mag() {
+      const { x, y } = this;
+      return Math.sqrt(x ** 2 + y ** 2);
+    }
+    normalized() {
+      const { x, y, mag } = this;
+      return new Vector2(x / mag(), y / mag());
+    }
+  }
+
+  class Ball {
+    constructor(p, v, r) {
+      this.p = p;
+      this.v = v;
+      this.r = r;
+    }
+  }
+
   window.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
-    let x = canvas.width / 2;
-    let y = canvas.height - 30;
-    let dx = 3;
-    let dy = -3;
-    let ballRadius = 10;
-    let paddleHeight = 10;
-    let paddleWidth = 75;
-    let paddleX = (canvas.width - paddleWidth) / 2;
+    if (!ctx) return;
+
+    const ball = new Ball(
+      new Vec2(canvas.width / 2, canvas.height - 30),
+      new Vec2(3, -3),
+      10
+    );
+
+    const paddle = new Ball(
+      new Vec2(canvas.width / 2, canvas.height),
+      new Vec2(0, 0),
+      20
+    );
+
     let rightPressed = false;
     let leftPressed = false;
     let brickRowCount = 3;
@@ -36,12 +80,12 @@
           let b = bricks[c][r];
           if (b.status === 0) continue;
           if (
-            x > b.x &&
-            x < b.x + brickWidth &&
-            y > b.y &&
-            y < b.y + brickHeight
+            ball.p.x > b.x &&
+            ball.p.x < b.x + brickWidth &&
+            ball.p.y > b.y &&
+            ball.p.y < b.y + brickHeight
           ) {
-            dy = -dy;
+            ball.v.y = -ball.v.y;
             b.status -= 1;
             score++;
             if (score == brickRowCount * brickColumnCount) {
@@ -56,7 +100,7 @@
     const mouseMoveHandler = (e) => {
       let relativeX = e.clientX - canvas.offsetLeft;
       if (relativeX > 0 && relativeX < canvas.width) {
-        paddleX = relativeX - paddleWidth / 2;
+        paddle.p.x = relativeX;
       }
     };
 
@@ -90,12 +134,7 @@
 
     const drawPaddle = () => {
       ctx.beginPath();
-      ctx.rect(
-        paddleX,
-        canvas.height - paddleHeight,
-        paddleWidth,
-        paddleHeight
-      );
+      ctx.arc(paddle.p.x, paddle.p.y, paddle.r, 0, Math.PI * 2, false);
       ctx.fillStyle = "#0095DD";
       ctx.fill();
       ctx.closePath();
@@ -103,7 +142,7 @@
 
     const drawBall = () => {
       ctx.beginPath();
-      ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+      ctx.arc(ball.p.x, ball.p.y, ball.r, 0, Math.PI * 2);
       ctx.fillStyle = "#0095DD";
       ctx.fill();
       ctx.closePath();
@@ -127,47 +166,73 @@
       }
     };
 
+    const getDistance = (x1, y1, x2, y2) => {
+      const dd = (x1 - x2) ** 2 + (y1 - y2) ** 2;
+      return Math.sqrt(dd);
+    };
+
     let id;
     let stop = false;
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawBall();
       drawPaddle();
-      drawBricks();
-      drawLives();
-      drawScore();
-      collisionDetection();
+      //drawBricks();
+      //drawLives();
+      //drawScore();
+      //collisionDetection();
 
-      if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-        dx = -dx;
-      }
-      if (y + dy < ballRadius) {
-        dy = -dy;
-      }
-      if (y + dy > canvas.height - ballRadius) {
-        if (x > paddleX && x < paddleX + paddleWidth) {
-          dy = -dy;
-        } else {
-          lives--;
-          if (lives === 0) {
-            alert("GAME OVER");
-            stop = true;
-          }
-          dx = 3;
-          dy = -3;
-          paddleX = (canvas.width - paddleWidth) / 2;
-        }
+      if (
+        ball.p.x + ball.v.x > canvas.width - ball.r ||
+        ball.p.x + ball.v.x < ball.r
+      ) {
+        ball.v.x *= -1;
       }
 
-      if (rightPressed && paddleX < canvas.width - paddleWidth) {
-        paddleX += 7;
-      }
-      if (leftPressed && paddleX > 0) {
-        paddleX -= 7;
+      if (
+        ball.p.y + ball.v.y < ball.r ||
+        ball.p.y + ball.v.y > canvas.height - ball.r
+      ) {
+        ball.v.y *= -1;
       }
 
-      x += dx;
-      y += dy;
+      const distance = getDistance(
+        ball.p.x + ball.v.x,
+        ball.p.y + ball.v.y,
+        paddle.p.x,
+        canvas.height
+      );
+
+      if (distance <= ball.r + paddle.p.r) {
+        ball.v.y *= -1;
+      }
+      // if (y + ball.v.y < ball.r) {
+      //   ball.v.y = -ball.v.y;
+      // }
+      // if (y + ball.v.y > canvas.height - ball.r) {
+      //   if (x > paddle.p.x - paddle.p.r && x < paddle.p.x + paddle.p.r) {
+      //     ball.v.y = -ball.v.y;
+      //   } else {
+      //     lives--;
+      //     if (lives === 0) {
+      //       alert("GAME OVER");
+      //       stop = true;
+      //     }
+      //     ball.v.x = 3;
+      //     ball.v.y = -3;
+      //     paddle.p.x = (canvas.width - paddle.p.r) / 2;
+      //   }
+      // }
+
+      if (rightPressed && paddle.p.x < canvas.width - paddle.p.r) {
+        paddle.p.x += 7;
+      }
+      if (leftPressed && paddle.p.x > 0) {
+        paddle.p.x -= 7;
+      }
+
+      ball.p.x += ball.v.x;
+      ball.p.y += ball.v.y;
 
       id = requestAnimationFrame(draw);
       if (stop) {
