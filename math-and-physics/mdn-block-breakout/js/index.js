@@ -71,7 +71,7 @@
     for (let c = 0; c < brickColumnCount; c++) {
       bricks[c] = [];
       for (let r = 0; r < brickRowCount; r++) {
-        bricks[c][r] = { x: 0, y: 0, status: 1 };
+        bricks[c][r] = { x: 0, y: 0, status: 3 };
       }
     }
 
@@ -89,7 +89,7 @@
             ball.v.y = -ball.v.y;
             b.status -= 1;
             score++;
-            if (score == brickRowCount * brickColumnCount) {
+            if (score == brickRowCount * brickColumnCount * 3) {
               alert("YOU WIN, CONGRATULATIONS!");
               //document.location.reload();
             }
@@ -152,14 +152,28 @@
     const drawBricks = () => {
       for (let c = 0; c < brickColumnCount; c++) {
         for (let r = 0; r < brickRowCount; r++) {
-          if (bricks[c][r].status === 1) {
+          if (bricks[c][r].status > 0) {
             let brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
             let brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
             bricks[c][r].x = brickX;
             bricks[c][r].y = brickY;
             ctx.beginPath();
             ctx.rect(brickX, brickY, brickWidth, brickHeight);
-            ctx.fillStyle = "#0095DD";
+            if (bricks[c][r].status)
+              switch (bricks[c][r].status) {
+                case 1:
+                  ctx.fillStyle = "#00ccdd";
+                  break;
+                case 2:
+                  ctx.fillStyle = "#0095DD";
+                  break;
+                case 3:
+                  ctx.fillStyle = "#2000dd";
+                  break;
+                default:
+                  ctx.fillStyle = "#0095DD";
+                  break;
+              }
             ctx.fill();
             ctx.closePath();
           }
