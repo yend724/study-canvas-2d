@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trigonometric</title>
+    <style>
+      .wrapper {
+        padding: 32px 0;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .canvas {
+        display: block;
+        margin: 16px auto 0;
+      }
+    </style>
+    <link rel="stylesheet" href="../common/css/reset.css" />
+    <script src="../common/js/Vec2.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1 class="title">逆三角関数 arctan</h1>
+      <canvas id="canvas" class="canvas"></canvas>
+    </div>
+    <script>
+      "use strict";
+      let canvas;
+      let context;
+      let angle;
+      let mousePos = {
+        x: 0,
+        y: 0,
+      };
+
+      const calcAngleDegrees = (x, y) => {
+        return (Math.atan2(y, x) * 180) / Math.PI;
+      };
+
+      const minMax = (n, min, max) => {
+        if (n < min) {
+          return min;
+        }
+        if (n > max) {
+          return max;
+        }
+
+        return n;
+      };
+
+      const getMousePosition = (canvas, e) => {
+        const rect = canvas.getBoundingClientRect();
+
+        return {
+          x: minMax(e.clientX - rect.left, 0, canvas.width),
+          y: minMax(e.clientY - rect.top, 0, canvas.height),
+        };
+      };
+
+      const loop = () => {
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.strokeStyle = "#000";
+        context.fillStyle = "#000";
+
+        context.save();
+        context.translate(canvas.width / 2, canvas.height / 2);
+        context.beginPath();
+        context.rotate((angle * Math.PI) / 180);
+        context.moveTo(-100, 0);
+        context.lineTo(100, 0);
+        context.lineWidth = 3;
+        context.stroke();
+        context.closePath();
+        context.beginPath();
+        context.moveTo(105, 0);
+        context.lineTo(90, 10);
+        context.lineTo(90, -10);
+        context.lineTo(105, 0);
+        context.fill();
+        context.closePath();
+        context.restore();
+        requestAnimationFrame(loop);
+      };
+
+      const init = () => {
+        canvas = document.getElementById("canvas");
+        canvas.width = 500;
+        canvas.height = 500;
+
+        context = canvas.getContext("2d");
+        if (!context) {
+          console.log("Error!");
+          return null;
+        }
+
+        context.fillStyle = "#ddd";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        window.addEventListener("mousemove", function (e) {
+          mousePos = getMousePosition(canvas, e);
+          angle = calcAngleDegrees(
+            mousePos.x - canvas.width / 2,
+            mousePos.y - canvas.height / 2
+          );
+        });
+
+        loop();
+      };
+
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
